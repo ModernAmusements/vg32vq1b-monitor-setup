@@ -251,6 +251,38 @@ It prints the live resolution/refresh, DDC brightness, font-smoothing values,
 the restore agent's state and the last agent activity, and marks each one
 `MATCH` or `MISMATCH`.
 
+### Two checks only real hardware can confirm
+
+Everything else is verified, but these two depend on events this machine
+cannot fake.
+
+**1. Monitor replug.** Unplug the HDMI cable for a few seconds, plug it back
+in, then within a minute:
+
+```sh
+tail -n 5 ~/Library/Logs/vg32vq1b-restore.log
+```
+
+Expected — either the macOS callback or the 60 s watchdog:
+
+```
+agent: applying (display connected or removed)
+# or
+agent: applying (display set changed)
+```
+
+followed by a fresh `display: ...` line and `apply finished with status 0`.
+Unplugging alone should log
+`external display disconnected; waiting for reconnect`. No new lines after a
+minute means the watchdog never saw the change.
+
+**2. Next login / reboot.** `agent: started` should appear in the log within
+a second or two of login. The agent runs from
+`~/Library/Application Support/vg32vq1b`, not from `~/Desktop`, because
+launching from the TCC-protected Desktop was once delayed by 153 s. After
+that, expect either a clean apply, or
+`display not available yet; retrying in 15s` while the panel powers up.
+
 Raw checks if you need them:
 
 ```sh
