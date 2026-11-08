@@ -1,33 +1,37 @@
 # Font Smoothing — macOS 26 / external 1× display
 
 Applied: 2026-11-04
+Last changed: 2026-11-08 (set to 3)
 Display: ASUS VG32VQ1B, 2560 × 1440 native, ~93 PPI (1× / non-Retina)
 
 ---
 
-## What was applied
+## What is applied
 
 ```sh
-defaults write -g AppleFontSmoothing -int 0            # global domain
-defaults -currentHost write -g AppleFontSmoothing -int 0   # per-host domain
+defaults write -g AppleFontSmoothing -int 3            # global domain
+defaults -currentHost write -g AppleFontSmoothing -int 3   # per-host domain
 ```
 
 Verified values:
 
 ```
-global domain:      0
-per-host domain:    0
+global domain:      3
+per-host domain:    3
 ```
 
-Value **0 = no smoothing** (crispest). (Originally 2 = medium, but text edges
-read as soft on this 93 PPI panel; lowered to 1 and then 0 on 2026-11-06.)
+Value **3** is the current setting, chosen by eye on this panel. History:
+
+- 2026-11-04: set to 2 (medium).
+- 2026-11-06: lowered to 1, then 0, because text edges looked soft.
+- 2026-11-08: set to 3 on purpose. `settings.conf` notes that 2 was too soft.
 
 **This requires a full logout / login to take effect.** Restarting Finder is
 not enough; each app must be relaunched.
 
-> This value is also enforced by `apply-settings.sh`, which the login agent
-> runs (see README §5). If it drifts it is set back to 2 at the next
-> login/wake.
+> This value is enforced by `apply-settings.sh`, which the login agent runs
+> (see README §5). It reads `FONT_SMOOTHING` from `settings.conf`, so change
+> the value there and run `./install.sh`, not the `defaults` commands alone.
 
 ---
 
@@ -38,17 +42,16 @@ macOS renders text on a 1× display with grayscale antialiasing. The
 
 | Value | Effect |
 |---|---|
-| **0** | No smoothing — thinnest strokes, crispest edges, most aliasing ← **currently set** |
+| **0** | No smoothing — thinnest strokes, crispest edges, most aliasing |
 | **1** | Light smoothing |
-| **2** | Medium smoothing (original setting) |
-| **3** | Strong smoothing — smoothest, heaviest, most "soft" |
+| **2** | Medium smoothing (too soft on this panel) |
+| **3** | Strong smoothing — heaviest strokes, smoothest edges ← **currently set** |
 
-Counter-intuitively, on non-Retina displays **lower values usually make text
-look sharper**. Higher values blend the edges into the background, which can
-read as blur. So:
+Higher values blend the edges into the background, which can read as blur.
+Lower values give thinner, sharper strokes but more aliasing.
 
-- text looks soft / smudged → go **down** (0 is the floor)
-- text looks too thin / faint → go **up** to 1, 2 or 3
+- text looks too thin / faint → go **up** (toward 3)
+- text looks soft / smudged → go **down** (toward 0)
 
 ---
 
@@ -56,16 +59,14 @@ read as blur. So:
 
 | What you see | Action |
 |---|---|
-| Text looks good | Leave at **0** — done |
-| Too thin / faint / spindly | Go back to **1** (light), then **2** if needed |
-| Still soft at 0 | This is the macOS floor; the limit is now the 93 PPI panel |
+| Text looks good | Leave at **3** — done |
+| Too heavy / blurry | Step down to **2**, then **1** |
+| Too thin / faint | Step up toward **3** (already the maximum) |
 
-To change the value:
+To change the value, edit `FONT_SMOOTHING` in `settings.conf`, then:
 
 ```sh
-# pick ONE: 0, 1, 2 or 3   (0 = current)
-defaults write -g AppleFontSmoothing -int 0
-defaults -currentHost write -g AppleFontSmoothing -int 0
+./install.sh
 ```
 
 Then log out and back in again.
@@ -81,9 +82,9 @@ defaults -currentHost delete -g AppleFontSmoothing
 
 Log out and back in.
 
-If the restore agent is installed it will set value **0** again at the next
-login. To make the revert stick, either run `./uninstall.sh` first or change
-`FONT_SMOOTHING` in `settings.conf` to the value you want.
+If the restore agent is installed it will set the `settings.conf` value again
+at the next login. To make the revert stick, either run `./uninstall.sh` first
+or change `FONT_SMOOTHING` in `settings.conf` to the value you want.
 
 ---
 

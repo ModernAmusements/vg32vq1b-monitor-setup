@@ -53,7 +53,7 @@ at that setting — the panel physically cannot display 4K.
 | Refresh rate | 144 Hz (HDMI maximum) | `build/display-mode` (CoreGraphics) |
 | Color depth | 8-bit | negotiated |
 | Brightness | 50 (≈125 nits, correct for SDR office use) | DDC via `m1ddc` |
-| Font smoothing | 0 (off, crispest) | `defaults` global + per-host |
+| Font smoothing | 3 (strongest, chosen by eye) | `defaults` global + per-host |
 | Color profile | factory `VG32VQ1B` ICC | default |
 | HDR / VRR | not engaged | — |
 | Persistence | re-applied on login, wake and reconnect | LaunchAgent, see §5 |
@@ -136,7 +136,7 @@ Sharpness locked at its factory value is the better trade.
 - **Night Shift:** off (for color accuracy)
 - **True Tone:** N/A on external displays
 
-### Font smoothing — APPLIED (value 0)
+### Font smoothing — APPLIED (value 3)
 
 macOS renders text on this 1× display with grayscale antialiasing. The
 system exposes a 0–3 scale:
@@ -148,18 +148,19 @@ system exposes a 0–3 scale:
 | 2 | Medium |
 | 3 | Strong — smoothest, heaviest, most "blurry" |
 
-**Currently set to 0** (off, crispest), in both the global and per-host domain:
+**Currently set to 3** (strongest), in both the global and per-host domain.
+This is a deliberate choice made by eye on this panel. `settings.conf` notes
+that 2 was too soft, and holds the same value:
 
 ```sh
-defaults write -g AppleFontSmoothing -int 0
-defaults -currentHost write -g AppleFontSmoothing -int 0
+defaults write -g AppleFontSmoothing -int 3
+defaults -currentHost write -g AppleFontSmoothing -int 3
 ```
 
 Takes effect after **logging out and back in** (not just restarting Finder).
 
-0 is the crispest setting macOS offers on a 1× display. If text looks too
-thin/faint or the aliasing is distracting, go back to **1** (light) or **2**
-(medium).
+If text now looks too heavy or blurry, step down to **2**, then **1**, and
+edit `FONT_SMOOTHING` in `settings.conf` before running `./install.sh`.
 
 Revert to the system default:
 
@@ -233,7 +234,7 @@ Logs: `~/Library/Logs/vg32vq1b-restore.log`
 - resolution **2560 × 1440**, native 1:1, mirroring off
 - refresh rate **144 Hz**
 - DDC brightness **50**
-- font smoothing **0**, global and per-host
+- font smoothing **3**, global and per-host
 
 Not scriptable through public macOS APIs, so still manual if they drift:
 **HDR**, **Night Shift**, **True Tone** (N/A here) and the monitor's own OSD
@@ -300,7 +301,7 @@ Expected:
 
 - `UI Looks like: 2560 x 1440 @ 144.00Hz`
 - `brightness = 50`
-- both font-smoothing domains = `0`
+- both font-smoothing domains = `3`
 - agent `state = running`
 
 If something is `MISMATCH`, run `./apply-settings.sh`. If 144 Hz still drops
