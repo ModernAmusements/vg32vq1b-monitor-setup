@@ -1,0 +1,10 @@
+# Agent working context — kept local, not part of the published project.
+AGENTS.md
+**/AGENTS.md
+
+# Compiled helpers; install.sh rebuilds them.
+build/
+
+# macOS noise
+.DS_Store
+._*
