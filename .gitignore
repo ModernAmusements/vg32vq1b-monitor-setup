@@ -5,6 +5,9 @@ AGENTS.md
 # Compiled helpers; install.sh rebuilds them.
 build/
 
+# Local Python environment for control-panel/.
+.venv/
+
 # macOS noise
 .DS_Store
 ._*
